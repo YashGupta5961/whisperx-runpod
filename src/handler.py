@@ -2,28 +2,21 @@ import runpod
 import whisperx
 import time
 
-asr_options = { 
-    "temperatures": [0],
-    "initial_prompt": None,
-    "task": "translate" 
-}
-
-model = whisperx.load_model(
-    "large-v3", "cuda", asr_options=asr_options
-)
+model = whisperx.load_model("large-v3", "cuda")
 
 def run_whisperx_job(job):
     start_time = time.time()
 
     job_input = job['input']
     url = job_input.get('url', "")
+    task = job_input.get('task', "transcribe")
 
     print(f"🚧 Loading audio from {url}...")
     audio = whisperx.load_audio(url)
     print("✅ Audio loaded")
 
     print("Transcribing...")
-    result = model.transcribe(audio, batch_size=16)
+    result = model.transcribe(audio, batch_size=16, task=task)
 
     end_time = time.time()
     time_s = (end_time - start_time)
