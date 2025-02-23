@@ -2,8 +2,10 @@ import runpod
 import whisperx
 import time
 
+asr_options = { "task": "translate" }
+
 model = whisperx.load_model(
-    "large-v3", "cuda"
+    "large-v3", "cuda", asr_options=asr_options
 )
 
 def run_whisperx_job(job):
