@@ -2,7 +2,8 @@ import runpod
 import whisperx
 import time
 
-model = whisperx.load_model("large-v3", "cuda")
+device="cuda"
+model = whisperx.load_model("large-v3", device)
 
 def run_whisperx_job(job):
     start_time = time.time()
@@ -10,6 +11,8 @@ def run_whisperx_job(job):
     job_input = job['input']
     url = job_input.get('url', "")
     task = job_input.get('task', "transcribe")
+    diarize = job_input.get('diarize', False)
+    hf_token = job_input.get('hf_token', '')
 
     print(f"🚧 Loading audio from {url}...")
     audio = whisperx.load_audio(url)
@@ -30,6 +33,13 @@ def run_whisperx_job(job):
         'detected_language' : result['language'],
         'segments' : result['segments']
     }
+
+    if diarize:
+        diarize_model = whisperx.DiarizationPipeline(use_auth_token=hf_token, device=device)
+        diarize_segments = diarize_model(audio)
+        diarized_result = whisperx.assign_word_speakers(diarize_segments, result)
+        print(diarized_result)
+        del diarize_model
 
     return output
 
