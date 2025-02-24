@@ -13,6 +13,8 @@ def run_whisperx_job(job):
     task = job_input.get('task', "transcribe")
     diarize = job_input.get('diarize', False)
     hf_token = job_input.get('hf_token', '')
+    min_speakers = job_input.get('min_speakers', None)
+    max_speakers = job_input.get('max_speakers', None)
 
     print(f"🚧 Loading audio from {url}...")
     audio = whisperx.load_audio(url)
@@ -29,18 +31,19 @@ def run_whisperx_job(job):
     # For easy migration, we are following the output format of runpod's 
     # official faster whisper.
     # https://github.com/runpod-workers/worker-faster_whisper/blob/main/src/predict.py#L111
+    
+
+    if diarize:
+        diarize_model = whisperx.DiarizationPipeline(use_auth_token=hf_token, device=device)
+        diarize_segments = diarize_model(audio, min_speakers=min_speakers, max_speakers=max_speakers)
+        result = whisperx.assign_word_speakers(diarize_segments, result)
+        del diarize_model
+
     output = {
         'detected_language' : result['language'],
         'segments' : result['segments']
     }
-
-    if diarize:
-        diarize_model = whisperx.DiarizationPipeline(use_auth_token=hf_token, device=device)
-        diarize_segments = diarize_model(audio)
-        diarized_result = whisperx.assign_word_speakers(diarize_segments, result)
-        print(diarized_result)
-        del diarize_model
-
+    
     return output
 
 runpod.serverless.start({"handler": run_whisperx_job})
