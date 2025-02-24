@@ -11,6 +11,7 @@ def run_whisperx_job(job):
     job_input = job['input']
     url = job_input.get('url', "")
     task = job_input.get('task', "transcribe")
+    align = job_input.get('align', False)
     diarize = job_input.get('diarize', False)
     hf_token = job_input.get('hf_token', '')
     min_speakers = job_input.get('min_speakers', None)
@@ -31,7 +32,10 @@ def run_whisperx_job(job):
     # For easy migration, we are following the output format of runpod's 
     # official faster whisper.
     # https://github.com/runpod-workers/worker-faster_whisper/blob/main/src/predict.py#L111
-    
+
+    if align:
+        model_a, metadata = whisperx.load_align_model(language_code=result["language"], device=device)
+        result = whisperx.align(result["segments"], model_a, metadata, audio, device, return_char_alignments=False)
 
     if diarize:
         diarize_model = whisperx.DiarizationPipeline(use_auth_token=hf_token, device=device)
