@@ -44,7 +44,6 @@ def run_whisperx_job(job):
         del diarize_model
 
     output = {
-        'detected_language' : result['language'],
         'segments' : result['segments']
     }
     
