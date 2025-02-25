@@ -3,7 +3,6 @@ import whisperx
 import time
 
 device="cuda"
-model = whisperx.load_model("large-v3", device)
 
 def run_whisperx_job(job):
     start_time = time.time()
@@ -16,6 +15,14 @@ def run_whisperx_job(job):
     hf_token = job_input.get('hf_token', '')
     min_speakers = job_input.get('min_speakers', None)
     max_speakers = job_input.get('max_speakers', None)
+    initial_prompt = job_input.get('initial_prompt', '')
+
+    asr_options = {
+        "temperatures": [0],
+        "initial_prompt": initial_prompt
+    }
+    
+    model = whisperx.load_model("large-v3", device, asr_options=asr_options)
 
     print(f"🚧 Loading audio from {url}...")
     audio = whisperx.load_audio(url)
