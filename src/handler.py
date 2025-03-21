@@ -16,13 +16,14 @@ def run_whisperx_job(job):
     min_speakers = job_input.get('min_speakers', None)
     max_speakers = job_input.get('max_speakers', None)
     initial_prompt = job_input.get('initial_prompt', '')
+    model = job_input.get('model', "large-v3")
 
     asr_options = {
         "temperatures": [0],
         "initial_prompt": initial_prompt
     }
     
-    model = whisperx.load_model("large-v3", device, asr_options=asr_options)
+    model = whisperx.load_model(model, device, asr_options=asr_options)
 
     print(f"🚧 Loading audio from {url}...")
     audio = whisperx.load_audio(url)
